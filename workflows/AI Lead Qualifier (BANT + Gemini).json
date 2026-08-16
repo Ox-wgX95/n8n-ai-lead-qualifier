@@ -1,0 +1,552 @@
+{
+  "name": "AI Lead Qualifier (BANT + Gemini)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AI Lead Qualifier\n\n**POST** `/webhook/lead-qualifier`\n\nBody: `name`, `email`, `budget`, `project_description`, `timeline`.\n\nGemini scores the lead with BANT (1–10) and classifies **HOT / WARM / COLD / SPAM**.\n\nFull prompt: `prompts/system_prompt.md`",
+        "height": 280,
+        "width": 360,
+        "color": 5
+      },
+      "id": "bd77bf63-f467-445a-8ac4-dd5d3876f945",
+      "name": "Note: Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1808,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Routing\n\n- **HOT / WARM** → Telegram + email to sales\n- **COLD / SPAM** → polite rejection to the lead\n- All paths → JSON response to the webhook caller",
+        "height": 200,
+        "width": 320,
+        "color": 4
+      },
+      "id": "49d34652-86a9-4844-86b3-bdf8ad05b563",
+      "name": "Note: Routing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-qualifier",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1270140e-0525-4317-9a97-129b2947e5b7",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1376,
+        384
+      ],
+      "webhookId": "a4f8c2e1-9b3d-4c7a-8e5f-2d1b0a9c8e7d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fld-name",
+              "name": "name",
+              "value": "={{ $json.body.name ?? $json.name ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "fld-email",
+              "name": "email",
+              "value": "={{ $json.body.email ?? $json.email ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "fld-budget",
+              "name": "budget",
+              "value": "={{ $json.body.budget ?? $json.budget ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "fld-desc",
+              "name": "project_description",
+              "value": "={{ $json.body.project_description ?? $json.project_description ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "fld-timeline",
+              "name": "timeline",
+              "value": "={{ $json.body.timeline ?? $json.timeline ?? '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c01d5bd8-8a30-4d63-afd3-fdc103214ebe",
+      "name": "Prepare Lead Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1136,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Evaluate this inbound lead with BANT. Return only the JSON object defined in the system message.\n\nLead:\n- name: {{ $json.name }}\n- email: {{ $json.email }}\n- budget: {{ $json.budget }}\n- project_description: {{ $json.project_description }}\n- timeline: {{ $json.timeline }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a senior B2B sales development representative and lead-qualification analyst. Your only job is to evaluate inbound leads with the BANT methodology and return a structured JSON verdict. You never chat, never ask follow-up questions, and never wrap the answer in markdown fences or prose.\n\nMission: score every lead from 1 to 10 and classify it as exactly one of HOT, WARM, COLD, SPAM. Be conservative. A missing signal is a weak signal. Do not invent budget, title, or urgency that the lead did not provide.\n\nBANT scoring (max 10):\n- Budget 0–3: 3 = explicit professional budget (~$3,000+); 2 = modest/vague ($500–$3,000, flexible); 1 = no number / cheapest-possible; 0 = free, barter, unpaid student work.\n- Authority 0–2: 2 = founder/owner/C-level/decision-maker; 1 = manager or plausible company email; 0 = intern/student/no role/disposable mailbox.\n- Need 0–3: 3 = concrete pain and deliverable; 2 = generic but believable business need; 1 = vague curiosity; 0 = homework, partnership spam, nonsense.\n- Timeline 0–2: 2 = dated deadline / this week or month / ASAP with a reason; 1 = this quarter / soon; 0 = someday or empty.\n\nScore = Budget + Authority + Need + Timeline, clamped to 1–10 (if total is 0, return 1).\n\nCategories:\n- HOT (8–10): strong BANT, immediate sales follow-up.\n- WARM (5–7): real opportunity with gaps.\n- COLD (3–4): weak fit or missing BANT.\n- SPAM (1–2): junk. Hard override to SPAM if disposable/fake email, keyboard smash, lorem ipsum, SEO/crypto/guest-post blast, adult/scam intent, or explicit empty test with no project.\n\nReturn ONLY this JSON shape:\n{\n  \"score\": 8,\n  \"category\": \"HOT\",\n  \"bant\": {\n    \"budget\": { \"score\": 3, \"comment\": \"...\" },\n    \"authority\": { \"score\": 2, \"comment\": \"...\" },\n    \"need\": { \"score\": 3, \"comment\": \"...\" },\n    \"timeline\": { \"score\": 2, \"comment\": \"...\" }\n  },\n  \"reasoning\": \"2-4 sentences quoting evidence.\",\n  \"recommended_action\": \"One concrete next step.\",\n  \"red_flags\": []\n}\n\ncategory must be uppercase HOT|WARM|COLD|SPAM. Nested BANT scores should sum to the top-level score (after the 0→1 clamp). red_flags is always an array."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "cbd13fc5-8b92-4ec5-817b-25489202b4c3",
+      "name": "BANT Qualifier",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -864,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "2f190c08-fdb8-41a0-8461-559792c5d541",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        608
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "rnPUToKDr5WtCfeu",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"required\": [\"score\", \"category\", \"bant\", \"reasoning\", \"recommended_action\", \"red_flags\"],\n  \"properties\": {\n    \"score\": { \"type\": \"number\", \"description\": \"Integer 1-10\" },\n    \"category\": { \"type\": \"string\", \"description\": \"HOT, WARM, COLD, or SPAM\" },\n    \"bant\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"budget\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"score\": { \"type\": \"number\" },\n            \"comment\": { \"type\": \"string\" }\n          }\n        },\n        \"authority\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"score\": { \"type\": \"number\" },\n            \"comment\": { \"type\": \"string\" }\n          }\n        },\n        \"need\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"score\": { \"type\": \"number\" },\n            \"comment\": { \"type\": \"string\" }\n          }\n        },\n        \"timeline\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"score\": { \"type\": \"number\" },\n            \"comment\": { \"type\": \"string\" }\n          }\n        }\n      }\n    },\n    \"reasoning\": { \"type\": \"string\" },\n    \"recommended_action\": { \"type\": \"string\" },\n    \"red_flags\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" }\n    }\n  }\n}"
+      },
+      "id": "3d4ddfe9-3db2-40c9-a78f-872b69481e6d",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -864,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst lead = $('Prepare Lead Data').first().json;\n\nlet q = raw.output !== undefined ? raw.output : raw;\nif (q && typeof q === 'object' && q.output && typeof q.output === 'object' && q.score === undefined) {\n  q = q.output;\n}\nif (typeof q === 'string') {\n  try {\n    q = JSON.parse(q.replace(/```json\\s?/gi, '').replace(/```/g, '').trim());\n  } catch (error) {\n    q = {};\n  }\n}\n\nconst allowed = ['HOT', 'WARM', 'COLD', 'SPAM'];\nconst category = String(q.category || 'COLD').toUpperCase().trim();\nlet score = Number(q.score);\nif (!Number.isFinite(score)) score = 1;\nscore = Math.min(10, Math.max(1, Math.round(score)));\n\nreturn [{\n  json: {\n    name: lead.name,\n    email: lead.email,\n    budget: lead.budget,\n    project_description: lead.project_description,\n    timeline: lead.timeline,\n    score,\n    category: allowed.includes(category) ? category : 'COLD',\n    bant: q.bant || {},\n    reasoning: q.reasoning || '',\n    recommended_action: q.recommended_action || '',\n    red_flags: Array.isArray(q.red_flags) ? q.red_flags : [],\n    qualified_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "52e6e934-d5e3-4091-846d-e2842f6faca4",
+      "name": "Normalize Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-hot",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "HOT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HOT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-warm",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "WARM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "WARM"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-cold",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "COLD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "COLD"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-spam",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "SPAM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SPAM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cc8709bb-0e40-4544-8a33-950909e05c14",
+      "name": "Route by Category",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -336,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ ($json.category === 'HOT' ? '🔥 *HOT lead*' : '🌤️ *WARM lead*') + '  (' + $json.score + '/10)\\n\\n' +\n'*Name:* ' + $json.name + '\\n' +\n'*Email:* ' + $json.email + '\\n' +\n'*Budget:* ' + $json.budget + '\\n' +\n'*Timeline:* ' + $json.timeline + '\\n\\n' +\n'*Project:* ' + $json.project_description + '\\n\\n' +\n'*Why:* ' + $json.reasoning + '\\n\\n' +\n'*Next step:* ' + $json.recommended_action }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "8ac561a0-740b-444c-9894-0a048711b68e",
+      "name": "Telegram Sales Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        240
+      ],
+      "webhookId": "7524a584-6273-42e0-a643-bb4df96bfbb6",
+      "credentials": {
+        "telegramApi": {
+          "id": "llz2TCMALZK3TYpg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.FROM_EMAIL }}",
+        "toEmail": "={{ $env.SALES_EMAIL }}",
+        "subject": "=[{{ $('Normalize Result').item.json.category }} {{ $('Normalize Result').item.json.score }}/10] {{ $('Webhook').item.json.body.name }}",
+        "html": "=<h2>{{ $('Normalize Result').item.json.category }} lead ({{ $('Normalize Result').item.json.score }}/10)</h2>\n<p><strong>Name:</strong> {{ $('Webhook').item.json.body.name }}</p>\n<p><strong>Email:</strong> {{ $('Webhook').item.json.body.email }}</p>\n<p><strong>Budget:</strong> {{ $('Webhook').item.json.body.budget }}</p>",
+        "options": {}
+      },
+      "id": "886dc738-d8ef-4314-b707-8d2c15a6d50b",
+      "name": "Email Sales Team",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        240
+      ],
+      "webhookId": "b5ea85b4-c77a-4627-84c5-0332ed0fd839",
+      "credentials": {
+        "smtp": {
+          "id": "3vsME9yfooT83SAk",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.FROM_EMAIL }}",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Thank you for reaching out",
+        "html": "=<p>Hi {{ $json.name || 'there' }},</p>\n<p>Thank you for your interest and for taking the time to describe your project.</p>\n<p>After a careful review we are not the right fit for this request at the moment, so we will not move forward with a sales call. We wish you a smooth search for a partner who can help.</p>\n<p>Kind regards,<br/>The team</p>",
+        "options": {}
+      },
+      "id": "b289e2c3-586f-4968-8e02-ef5e83006a35",
+      "name": "Email Polite Rejection",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        64,
+        560
+      ],
+      "webhookId": "5f6b7e99-601a-49a0-919a-21c9e5690a3e",
+      "credentials": {
+        "smtp": {
+          "id": "3vsME9yfooT83SAk",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  ok: true,\n  lead: {\n    name: $('Normalize Result').first().json.name,\n    email: $('Normalize Result').first().json.email,\n    budget: $('Normalize Result').first().json.budget,\n    timeline: $('Normalize Result').first().json.timeline\n  },\n  qualification: {\n    score: $('Normalize Result').first().json.score,\n    category: $('Normalize Result').first().json.category,\n    bant: $('Normalize Result').first().json.bant,\n    reasoning: $('Normalize Result').first().json.reasoning,\n    recommended_action: $('Normalize Result').first().json.recommended_action,\n    red_flags: $('Normalize Result').first().json.red_flags,\n    qualified_at: $('Normalize Result').first().json.qualified_at\n  }\n}) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "088a7a35-3662-408e-afe8-b57fe5842e20",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        384
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Lead Data": {
+      "main": [
+        [
+          {
+            "node": "BANT Qualifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "BANT Qualifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "BANT Qualifier",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BANT Qualifier": {
+      "main": [
+        [
+          {
+            "node": "Normalize Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Result": {
+      "main": [
+        [
+          {
+            "node": "Route by Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Category": {
+      "main": [
+        [
+          {
+            "node": "Telegram Sales Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram Sales Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Polite Rejection",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Polite Rejection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Sales Alert": {
+      "main": [
+        [
+          {
+            "node": "Email Sales Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Sales Team": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Polite Rejection": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8b758d46-a2c4-44e0-966b-f261d339bb1d",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "MdkHAWYjyc4Yryfv",
+  "tags": [
+    {
+      "updatedAt": "2026-08-15T10:08:19.366Z",
+      "createdAt": "2026-08-15T10:08:19.366Z",
+      "id": "A202SgdEm6EpSgqU",
+      "name": "leads"
+    },
+    {
+      "updatedAt": "2026-08-15T10:08:19.395Z",
+      "createdAt": "2026-08-15T10:08:19.395Z",
+      "id": "SUNO14XkiOCvCoAd",
+      "name": "gemini"
+    },
+    {
+      "updatedAt": "2026-08-15T10:08:19.449Z",
+      "createdAt": "2026-08-15T10:08:19.449Z",
+      "id": "l4YDvQfgP1rzWfiX",
+      "name": "bant"
+    },
+    {
+      "updatedAt": "2026-08-15T10:08:19.321Z",
+      "createdAt": "2026-08-15T10:08:19.321Z",
+      "id": "rk86ZHrzTNBsm1ZO",
+      "name": "ai"
+    }
+  ]
+}
