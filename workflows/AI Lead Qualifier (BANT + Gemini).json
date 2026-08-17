@@ -19,8 +19,8 @@
     },
     {
       "parameters": {
-        "content": "## Routing\n\n- **HOT / WARM** → Telegram + email to sales\n- **COLD / SPAM** → polite rejection to the lead\n- All paths → JSON response to the webhook caller",
-        "height": 200,
+        "content": "## Routing\n\nEvery scored lead is written to Airtable on its own branch, so a CRM problem can never block a HOT alert.\n\n- **HOT / WARM** → Telegram + email to sales\n- **COLD / SPAM** → polite rejection to the lead\n- All paths → JSON response to the webhook caller\n\nAirtable needs `AIRTABLE_BASE_ID` and `AIRTABLE_TABLE_NAME` in Settings → Variables.",
+        "height": 300,
         "width": 320,
         "color": 4
       },
@@ -67,6 +67,12 @@
               "type": "string"
             },
             {
+              "id": "fld-company",
+              "name": "company",
+              "value": "={{ $json.body.company ?? $json.company ?? ($json.body.email ?? $json.email ?? '').split('@')[1] ?? '' }}",
+              "type": "string"
+            },
+            {
               "id": "fld-budget",
               "name": "budget",
               "value": "={{ $json.body.budget ?? $json.budget ?? '' }}",
@@ -100,12 +106,12 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Evaluate this inbound lead with BANT. Return only the JSON object defined in the system message.\n\nLead:\n- name: {{ $json.name }}\n- email: {{ $json.email }}\n- budget: {{ $json.budget }}\n- project_description: {{ $json.project_description }}\n- timeline: {{ $json.timeline }}",
+        "text": "=Evaluate this inbound lead with BANT. Return only the JSON object defined in the system message.\n\nLead:\n- name: {{ $json.name }}\n- email: {{ $json.email }}\n- company: {{ $json.company }}\n- budget: {{ $json.budget }}\n- project_description: {{ $json.project_description }}\n- timeline: {{ $json.timeline }}",
         "hasOutputParser": true,
         "messages": {
           "messageValues": [
             {
-              "message": "You are a senior B2B sales development representative and lead-qualification analyst. Your only job is to evaluate inbound leads with the BANT methodology and return a structured JSON verdict. You never chat, never ask follow-up questions, and never wrap the answer in markdown fences or prose.\n\nMission: score every lead from 1 to 10 and classify it as exactly one of HOT, WARM, COLD, SPAM. Be conservative. A missing signal is a weak signal. Do not invent budget, title, or urgency that the lead did not provide.\n\nBANT scoring (max 10):\n- Budget 0–3: 3 = explicit professional budget (~$3,000+); 2 = modest/vague ($500–$3,000, flexible); 1 = no number / cheapest-possible; 0 = free, barter, unpaid student work.\n- Authority 0–2: 2 = founder/owner/C-level/decision-maker; 1 = manager or plausible company email; 0 = intern/student/no role/disposable mailbox.\n- Need 0–3: 3 = concrete pain and deliverable; 2 = generic but believable business need; 1 = vague curiosity; 0 = homework, partnership spam, nonsense.\n- Timeline 0–2: 2 = dated deadline / this week or month / ASAP with a reason; 1 = this quarter / soon; 0 = someday or empty.\n\nScore = Budget + Authority + Need + Timeline, clamped to 1–10 (if total is 0, return 1).\n\nCategories:\n- HOT (8–10): strong BANT, immediate sales follow-up.\n- WARM (5–7): real opportunity with gaps.\n- COLD (3–4): weak fit or missing BANT.\n- SPAM (1–2): junk. Hard override to SPAM if disposable/fake email, keyboard smash, lorem ipsum, SEO/crypto/guest-post blast, adult/scam intent, or explicit empty test with no project.\n\nReturn ONLY this JSON shape:\n{\n  \"score\": 8,\n  \"category\": \"HOT\",\n  \"bant\": {\n    \"budget\": { \"score\": 3, \"comment\": \"...\" },\n    \"authority\": { \"score\": 2, \"comment\": \"...\" },\n    \"need\": { \"score\": 3, \"comment\": \"...\" },\n    \"timeline\": { \"score\": 2, \"comment\": \"...\" }\n  },\n  \"reasoning\": \"2-4 sentences quoting evidence.\",\n  \"recommended_action\": \"One concrete next step.\",\n  \"red_flags\": []\n}\n\ncategory must be uppercase HOT|WARM|COLD|SPAM. Nested BANT scores should sum to the top-level score (after the 0→1 clamp). red_flags is always an array."
+              "message": "You are a senior B2B sales development representative and lead-qualification analyst. Your only job is to evaluate inbound leads with the BANT methodology and return a structured JSON verdict. You never chat, never ask follow-up questions, and never wrap the answer in markdown fences or prose.\n\nMission: score every lead from 1 to 10 and classify it as exactly one of HOT, WARM, COLD, SPAM. Be conservative. A missing signal is a weak signal. Do not invent budget, title, or urgency that the lead did not provide.\n\nThe company field may be auto-derived from the email domain when the lead did not type one, so a company name alone is weak evidence of authority.\n\nBANT scoring (max 10):\n- Budget 0–3: 3 = explicit professional budget (~$3,000+); 2 = modest/vague ($500–$3,000, flexible); 1 = no number / cheapest-possible; 0 = free, barter, unpaid student work.\n- Authority 0–2: 2 = founder/owner/C-level/decision-maker; 1 = manager or plausible company email; 0 = intern/student/no role/disposable mailbox.\n- Need 0–3: 3 = concrete pain and deliverable; 2 = generic but believable business need; 1 = vague curiosity; 0 = homework, partnership spam, nonsense.\n- Timeline 0–2: 2 = dated deadline / this week or month / ASAP with a reason; 1 = this quarter / soon; 0 = someday or empty.\n\nScore = Budget + Authority + Need + Timeline, clamped to 1–10 (if total is 0, return 1).\n\nCategories:\n- HOT (8–10): strong BANT, immediate sales follow-up.\n- WARM (5–7): real opportunity with gaps.\n- COLD (3–4): weak fit or missing BANT.\n- SPAM (1–2): junk. Hard override to SPAM if disposable/fake email, keyboard smash, lorem ipsum, SEO/crypto/guest-post blast, adult/scam intent, or explicit empty test with no project.\n\nReturn ONLY this JSON shape:\n{\n  \"score\": 8,\n  \"category\": \"HOT\",\n  \"bant\": {\n    \"budget\": { \"score\": 3, \"comment\": \"...\" },\n    \"authority\": { \"score\": 2, \"comment\": \"...\" },\n    \"need\": { \"score\": 3, \"comment\": \"...\" },\n    \"timeline\": { \"score\": 2, \"comment\": \"...\" }\n  },\n  \"reasoning\": \"2-4 sentences quoting evidence.\",\n  \"recommended_action\": \"One concrete next step.\",\n  \"red_flags\": []\n}\n\ncategory must be uppercase HOT|WARM|COLD|SPAM. Nested BANT scores should sum to the top-level score (after the 0→1 clamp). red_flags is always an array."
             }
           ]
         },
@@ -158,7 +164,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.first().json;\nconst lead = $('Prepare Lead Data').first().json;\n\nlet q = raw.output !== undefined ? raw.output : raw;\nif (q && typeof q === 'object' && q.output && typeof q.output === 'object' && q.score === undefined) {\n  q = q.output;\n}\nif (typeof q === 'string') {\n  try {\n    q = JSON.parse(q.replace(/```json\\s?/gi, '').replace(/```/g, '').trim());\n  } catch (error) {\n    q = {};\n  }\n}\n\nconst allowed = ['HOT', 'WARM', 'COLD', 'SPAM'];\nconst category = String(q.category || 'COLD').toUpperCase().trim();\nlet score = Number(q.score);\nif (!Number.isFinite(score)) score = 1;\nscore = Math.min(10, Math.max(1, Math.round(score)));\n\nreturn [{\n  json: {\n    name: lead.name,\n    email: lead.email,\n    budget: lead.budget,\n    project_description: lead.project_description,\n    timeline: lead.timeline,\n    score,\n    category: allowed.includes(category) ? category : 'COLD',\n    bant: q.bant || {},\n    reasoning: q.reasoning || '',\n    recommended_action: q.recommended_action || '',\n    red_flags: Array.isArray(q.red_flags) ? q.red_flags : [],\n    qualified_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const raw = $input.first().json;\nconst lead = $('Prepare Lead Data').first().json;\n\nlet q = raw.output !== undefined ? raw.output : raw;\nif (q && typeof q === 'object' && q.output && typeof q.output === 'object' && q.score === undefined) {\n  q = q.output;\n}\nif (typeof q === 'string') {\n  try {\n    q = JSON.parse(q.replace(/```json\\s?/gi, '').replace(/```/g, '').trim());\n  } catch (error) {\n    q = {};\n  }\n}\n\nconst allowed = ['HOT', 'WARM', 'COLD', 'SPAM'];\nconst category = String(q.category || 'COLD').toUpperCase().trim();\nlet score = Number(q.score);\nif (!Number.isFinite(score)) score = 1;\nscore = Math.min(10, Math.max(1, Math.round(score)));\n\nreturn [{\n  json: {\n    name: lead.name,\n    email: lead.email,\n    company: lead.company,\n    budget: lead.budget,\n    project_description: lead.project_description,\n    timeline: lead.timeline,\n    score,\n    category: allowed.includes(category) ? category : 'COLD',\n    bant: q.bant || {},\n    reasoning: q.reasoning || '',\n    recommended_action: q.recommended_action || '',\n    red_flags: Array.isArray(q.red_flags) ? q.red_flags : [],\n    qualified_at: new Date().toISOString()\n  }\n}];"
       },
       "id": "52e6e934-d5e3-4091-846d-e2842f6faca4",
       "name": "Normalize Result",
@@ -168,6 +174,157 @@
         -576,
         384
       ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "={{ $env.AIRTABLE_BASE_ID }}",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "={{ $env.AIRTABLE_TABLE_NAME }}",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Lead Name": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Company": "={{ $json.company }}",
+            "Budget": "={{ $json.budget }}",
+            "Authority": "={{ $json.bant.authority ? $json.bant.authority.comment : '' }}",
+            "Need": "={{ $json.project_description }}",
+            "Timeline": "={{ $json.timeline }}",
+            "BANT Score": "={{ $json.score }}",
+            "Category": "={{ $json.category }}",
+            "AI Summary": "={{ $json.reasoning }}\n\nRecommended next step: {{ $json.recommended_action }}",
+            "Created At": "={{ $json.qualified_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Lead Name",
+              "displayName": "Lead Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Authority",
+              "displayName": "Authority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Need",
+              "displayName": "Need",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "BANT Score",
+              "displayName": "BANT Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "options",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "f1a7c9d2-3b64-4e58-9c07-6d5e8a2b41f3",
+      "name": "Save Lead to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        672
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "airtable-pat",
+          "name": "Airtable Personal Access Token"
+        }
+      }
     },
     {
       "parameters": {
@@ -362,7 +519,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({\n  ok: true,\n  lead: {\n    name: $('Normalize Result').first().json.name,\n    email: $('Normalize Result').first().json.email,\n    budget: $('Normalize Result').first().json.budget,\n    timeline: $('Normalize Result').first().json.timeline\n  },\n  qualification: {\n    score: $('Normalize Result').first().json.score,\n    category: $('Normalize Result').first().json.category,\n    bant: $('Normalize Result').first().json.bant,\n    reasoning: $('Normalize Result').first().json.reasoning,\n    recommended_action: $('Normalize Result').first().json.recommended_action,\n    red_flags: $('Normalize Result').first().json.red_flags,\n    qualified_at: $('Normalize Result').first().json.qualified_at\n  }\n}) }}",
+        "responseBody": "={{ JSON.stringify({\n  ok: true,\n  lead: {\n    name: $('Normalize Result').first().json.name,\n    email: $('Normalize Result').first().json.email,\n    company: $('Normalize Result').first().json.company,\n    budget: $('Normalize Result').first().json.budget,\n    timeline: $('Normalize Result').first().json.timeline\n  },\n  qualification: {\n    score: $('Normalize Result').first().json.score,\n    category: $('Normalize Result').first().json.category,\n    bant: $('Normalize Result').first().json.bant,\n    reasoning: $('Normalize Result').first().json.reasoning,\n    recommended_action: $('Normalize Result').first().json.recommended_action,\n    red_flags: $('Normalize Result').first().json.red_flags,\n    qualified_at: $('Normalize Result').first().json.qualified_at\n  }\n}) }}",
         "options": {
           "responseCode": 200
         }
@@ -437,6 +594,11 @@
     "Normalize Result": {
       "main": [
         [
+          {
+            "node": "Save Lead to Airtable",
+            "type": "main",
+            "index": 0
+          },
           {
             "node": "Route by Category",
             "type": "main",
