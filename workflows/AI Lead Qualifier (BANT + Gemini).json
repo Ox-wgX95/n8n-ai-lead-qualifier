@@ -8,13 +8,222 @@
         "width": 360,
         "color": 5
       },
-      "id": "bd77bf63-f467-445a-8ac4-dd5d3876f945",
+      "id": "77d83282-18f0-4c5b-a976-1a852a780553",
       "name": "Note: Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1808,
-        160
+        -1504,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Routing\n\n- **HOT / WARM** → Telegram + email to sales\n- **COLD / SPAM** → polite rejection to the lead\n- All paths → JSON response to the webhook caller",
+        "height": 200,
+        "width": 320,
+        "color": 4
+      },
+      "id": "48b84146-b4dd-4ec6-95a2-33fe6ccb3c77",
+      "name": "Note: Routing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "=https://airtable.com/appDkiH0yF3vavADI/tblHfMAfLDX3mOqsy/viwOknldLwltnm24z?blocks=hide",
+          "mode": "url"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblHfMAfLDX3mOqsy",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appDkiH0yF3vavADI/tblHfMAfLDX3mOqsy"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Lead Name": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Company": "={{ $json.company }}",
+            "Budget": "={{ $json.budget }}",
+            "Timeline": "={{ $json.timeline }}",
+            "Category": "={{ $json.category }}",
+            "Created At": "={{ $json.qualified_at }}",
+            "Need": "={{ $json.bant.need }}",
+            "BANT Score": "={{ $json.bant }}",
+            "AI Summary": "={{ $json.reasoning }}",
+            "Authority": "={{ $json.bant.authority }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Lead Name",
+              "displayName": "Lead Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Authority",
+              "displayName": "Authority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Need",
+              "displayName": "Need",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "BANT Score",
+              "displayName": "BANT Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "27b9942f-c0b7-4534-8ce6-da97c104a567",
+      "name": "Save Lead to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        592,
+        752
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Ow2WcGTHcSo8Txgf",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## AI Lead Qualifier\n\n**POST** `/webhook/lead-qualifier`\n\nBody: `name`, `email`, `budget`, `project_description`, `timeline`.\n\nGemini scores the lead with BANT (1–10) and classifies **HOT / WARM / COLD / SPAM**.\n\nFull prompt: `prompts/system_prompt.md`",
+        "height": 280,
+        "width": 360,
+        "color": 5
+      },
+      "id": "5ff924d9-41d7-4782-b78e-2cb329365780",
+      "name": "Note: Overview1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        -176
       ]
     },
     {
@@ -24,13 +233,13 @@
         "width": 320,
         "color": 4
       },
-      "id": "49d34652-86a9-4844-86b3-bdf8ad05b563",
-      "name": "Note: Routing",
+      "id": "ba08b1f8-5237-494f-8026-42a64920808a",
+      "name": "Note: Routing1",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        304,
+        -320
       ]
     },
     {
@@ -40,13 +249,13 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "1270140e-0525-4317-9a97-129b2947e5b7",
-      "name": "Webhook",
+      "id": "1fe20100-b1a0-4efc-99d9-b93ce30f4e12",
+      "name": "Webhook1",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1376,
-        384
+        -1264,
+        368
       ],
       "webhookId": "a4f8c2e1-9b3d-4c7a-8e5f-2d1b0a9c8e7d"
     },
@@ -94,12 +303,12 @@
         },
         "options": {}
       },
-      "id": "c01d5bd8-8a30-4d63-afd3-fdc103214ebe",
-      "name": "Prepare Lead Data",
+      "id": "6cde5419-3a14-49c0-b17b-44e197111341",
+      "name": "Prepare Lead Data1",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1136,
+        -928,
         384
       ]
     },
@@ -117,13 +326,13 @@
         },
         "batching": {}
       },
-      "id": "cbd13fc5-8b92-4ec5-817b-25489202b4c3",
-      "name": "BANT Qualifier",
+      "id": "8a8470ec-efac-4155-b188-0c64f59b74a6",
+      "name": "BANT Qualifier1",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -864,
-        384
+        -624,
+        400
       ]
     },
     {
@@ -133,13 +342,13 @@
           "temperature": 0.2
         }
       },
-      "id": "2f190c08-fdb8-41a0-8461-559792c5d541",
-      "name": "Google Gemini Chat Model",
+      "id": "0a7fdd96-42fd-4707-9381-ba534448259f",
+      "name": "Google Gemini Chat Model1",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -864,
-        608
+        -672,
+        768
       ],
       "credentials": {
         "googlePalmApi": {
@@ -153,178 +362,27 @@
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"required\": [\"score\", \"category\", \"bant\", \"reasoning\", \"recommended_action\", \"red_flags\"],\n  \"properties\": {\n    \"score\": { \"type\": \"number\", \"description\": \"Integer 1-10\" },\n    \"category\": { \"type\": \"string\", \"description\": \"HOT, WARM, COLD, or SPAM\" },\n    \"bant\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"budget\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"score\": { \"type\": \"number\" },\n            \"comment\": { \"type\": \"string\" }\n          }\n        },\n        \"authority\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"score\": { \"type\": \"number\" },\n            \"comment\": { \"type\": \"string\" }\n          }\n        },\n        \"need\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"score\": { \"type\": \"number\" },\n            \"comment\": { \"type\": \"string\" }\n          }\n        },\n        \"timeline\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"score\": { \"type\": \"number\" },\n            \"comment\": { \"type\": \"string\" }\n          }\n        }\n      }\n    },\n    \"reasoning\": { \"type\": \"string\" },\n    \"recommended_action\": { \"type\": \"string\" },\n    \"red_flags\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" }\n    }\n  }\n}"
       },
-      "id": "3d4ddfe9-3db2-40c9-a78f-872b69481e6d",
-      "name": "Structured Output Parser",
+      "id": "09e521f7-06b5-4ce1-a991-c067e63deb0c",
+      "name": "Structured Output Parser1",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        -864,
-        160
+        -464,
+        768
       ]
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.first().json;\nconst lead = $('Prepare Lead Data').first().json;\n\nlet q = raw.output !== undefined ? raw.output : raw;\nif (q && typeof q === 'object' && q.output && typeof q.output === 'object' && q.score === undefined) {\n  q = q.output;\n}\nif (typeof q === 'string') {\n  try {\n    q = JSON.parse(q.replace(/```json\\s?/gi, '').replace(/```/g, '').trim());\n  } catch (error) {\n    q = {};\n  }\n}\n\nconst allowed = ['HOT', 'WARM', 'COLD', 'SPAM'];\nconst category = String(q.category || 'COLD').toUpperCase().trim();\nlet score = Number(q.score);\nif (!Number.isFinite(score)) score = 1;\nscore = Math.min(10, Math.max(1, Math.round(score)));\n\nreturn [{\n  json: {\n    name: lead.name,\n    email: lead.email,\n    company: lead.company,\n    budget: lead.budget,\n    project_description: lead.project_description,\n    timeline: lead.timeline,\n    score,\n    category: allowed.includes(category) ? category : 'COLD',\n    bant: q.bant || {},\n    reasoning: q.reasoning || '',\n    recommended_action: q.recommended_action || '',\n    red_flags: Array.isArray(q.red_flags) ? q.red_flags : [],\n    qualified_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const raw = $input.first().json;\nconst lead = $('Prepare Lead Data1').first().json;\n\nlet q = raw.output !== undefined ? raw.output : raw;\nif (q && typeof q === 'object' && q.output && typeof q.output === 'object' && q.score === undefined) {\n  q = q.output;\n}\nif (typeof q === 'string') {\n  try {\n    q = JSON.parse(q.replace(/```json\\s?/gi, '').replace(/```/g, '').trim());\n  } catch (error) {\n    q = {};\n  }\n}\n\nconst allowed = ['HOT', 'WARM', 'COLD', 'SPAM'];\nconst category = String(q.category || 'COLD').toUpperCase().trim();\nlet score = Number(q.score);\nif (!Number.isFinite(score)) score = 1;\nscore = Math.min(10, Math.max(1, Math.round(score)));\n\nreturn [{\n  json: {\n    name: lead.name,\n    email: lead.email,\n    company: lead.company,\n    budget: lead.budget,\n    project_description: lead.project_description,\n    timeline: lead.timeline,\n    score,\n    category: allowed.includes(category) ? category : 'COLD',\n    bant: q.bant || {},\n    reasoning: q.reasoning || '',\n    recommended_action: q.recommended_action || '',\n    red_flags: Array.isArray(q.red_flags) ? q.red_flags : [],\n    qualified_at: new Date().toISOString()\n  }\n}];"
       },
-      "id": "52e6e934-d5e3-4091-846d-e2842f6faca4",
-      "name": "Normalize Result",
+      "id": "08964303-b338-4e1e-806e-990865e312e2",
+      "name": "Normalize Result1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -576,
+        -128,
         384
       ]
-    },
-    {
-      "parameters": {
-        "operation": "create",
-        "base": {
-          "__rl": true,
-          "value": "={{ $env.AIRTABLE_BASE_ID }}",
-          "mode": "id"
-        },
-        "table": {
-          "__rl": true,
-          "value": "={{ $env.AIRTABLE_TABLE_NAME }}",
-          "mode": "id"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "Lead Name": "={{ $json.name }}",
-            "Email": "={{ $json.email }}",
-            "Company": "={{ $json.company }}",
-            "Budget": "={{ $json.budget }}",
-            "Authority": "={{ $json.bant.authority ? $json.bant.authority.comment : '' }}",
-            "Need": "={{ $json.project_description }}",
-            "Timeline": "={{ $json.timeline }}",
-            "BANT Score": "={{ $json.score }}",
-            "Category": "={{ $json.category }}",
-            "AI Summary": "={{ $json.reasoning }}\n\nRecommended next step: {{ $json.recommended_action }}",
-            "Created At": "={{ $json.qualified_at }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "Lead Name",
-              "displayName": "Lead Name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Email",
-              "displayName": "Email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Company",
-              "displayName": "Company",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Budget",
-              "displayName": "Budget",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Authority",
-              "displayName": "Authority",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Need",
-              "displayName": "Need",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Timeline",
-              "displayName": "Timeline",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "BANT Score",
-              "displayName": "BANT Score",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Category",
-              "displayName": "Category",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "options",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "AI Summary",
-              "displayName": "AI Summary",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "Created At",
-              "displayName": "Created At",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true
-            }
-          ]
-        },
-        "options": {
-          "typecast": true
-        }
-      },
-      "id": "f1a7c9d2-3b64-4e58-9c07-6d5e8a2b41f3",
-      "name": "Save Lead to Airtable",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [
-        -336,
-        672
-      ],
-      "onError": "continueRegularOutput",
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "airtable-pat",
-          "name": "Airtable Personal Access Token"
-        }
-      }
     },
     {
       "parameters": {
@@ -434,31 +492,31 @@
         },
         "options": {}
       },
-      "id": "cc8709bb-0e40-4544-8a33-950909e05c14",
-      "name": "Route by Category",
+      "id": "fb4f7e01-15ac-4876-a3cd-61b946f8b95f",
+      "name": "Route by Category1",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -336,
-        384
+        144,
+        336
       ]
     },
     {
       "parameters": {
-        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
         "text": "={{ ($json.category === 'HOT' ? '🔥 *HOT lead*' : '🌤️ *WARM lead*') + '  (' + $json.score + '/10)\\n\\n' +\n'*Name:* ' + $json.name + '\\n' +\n'*Email:* ' + $json.email + '\\n' +\n'*Budget:* ' + $json.budget + '\\n' +\n'*Timeline:* ' + $json.timeline + '\\n\\n' +\n'*Project:* ' + $json.project_description + '\\n\\n' +\n'*Why:* ' + $json.reasoning + '\\n\\n' +\n'*Next step:* ' + $json.recommended_action }}",
         "additionalFields": {
           "appendAttribution": false,
           "parse_mode": "Markdown"
         }
       },
-      "id": "8ac561a0-740b-444c-9894-0a048711b68e",
-      "name": "Telegram Sales Alert",
+      "id": "a06183a3-7338-41cd-9b1f-55426d70e686",
+      "name": "Telegram Sales Alert1",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -16,
-        240
+        448,
+        192
       ],
       "webhookId": "7524a584-6273-42e0-a643-bb4df96bfbb6",
       "credentials": {
@@ -470,19 +528,19 @@
     },
     {
       "parameters": {
-        "fromEmail": "={{ $env.FROM_EMAIL }}",
-        "toEmail": "={{ $env.SALES_EMAIL }}",
-        "subject": "=[{{ $('Normalize Result').item.json.category }} {{ $('Normalize Result').item.json.score }}/10] {{ $('Webhook').item.json.body.name }}",
-        "html": "=<h2>{{ $('Normalize Result').item.json.category }} lead ({{ $('Normalize Result').item.json.score }}/10)</h2>\n<p><strong>Name:</strong> {{ $('Webhook').item.json.body.name }}</p>\n<p><strong>Email:</strong> {{ $('Webhook').item.json.body.email }}</p>\n<p><strong>Budget:</strong> {{ $('Webhook').item.json.body.budget }}</p>",
+        "fromEmail": "={{ $vars.Email }}",
+        "toEmail": "={{ $vars.Email }}",
+        "subject": "=[{{ $('Normalize Result1').item.json.category }} {{ $('Normalize Result1').item.json.score }}/10] {{ $('Webhook1').item.json.body.name }}",
+        "html": "=<h2>{{ $('Normalize Result1').item.json.category }} lead ({{ $('Normalize Result1').item.json.score }}/10)</h2>\n<p><strong>Name:</strong> {{ $('Webhook1').item.json.body.name }}</p>\n<p><strong>Email:</strong> {{ $('Webhook1').item.json.body.email }}</p>\n<p><strong>Budget:</strong> {{ $('Webhook1').item.json.body.budget }}</p>",
         "options": {}
       },
-      "id": "886dc738-d8ef-4314-b707-8d2c15a6d50b",
-      "name": "Email Sales Team",
+      "id": "d92c911e-9f1e-4d0e-866a-5276a659acc6",
+      "name": "Email Sales Team1",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        160,
-        240
+        688,
+        192
       ],
       "webhookId": "b5ea85b4-c77a-4627-84c5-0332ed0fd839",
       "credentials": {
@@ -500,13 +558,13 @@
         "html": "=<p>Hi {{ $json.name || 'there' }},</p>\n<p>Thank you for your interest and for taking the time to describe your project.</p>\n<p>After a careful review we are not the right fit for this request at the moment, so we will not move forward with a sales call. We wish you a smooth search for a partner who can help.</p>\n<p>Kind regards,<br/>The team</p>",
         "options": {}
       },
-      "id": "b289e2c3-586f-4968-8e02-ef5e83006a35",
-      "name": "Email Polite Rejection",
+      "id": "87f304fc-5a65-4c91-94a8-6a37ed7dc367",
+      "name": "Email Polite Rejection1",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        64,
-        560
+        608,
+        480
       ],
       "webhookId": "5f6b7e99-601a-49a0-919a-21c9e5690a3e",
       "credentials": {
@@ -519,79 +577,79 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({\n  ok: true,\n  lead: {\n    name: $('Normalize Result').first().json.name,\n    email: $('Normalize Result').first().json.email,\n    company: $('Normalize Result').first().json.company,\n    budget: $('Normalize Result').first().json.budget,\n    timeline: $('Normalize Result').first().json.timeline\n  },\n  qualification: {\n    score: $('Normalize Result').first().json.score,\n    category: $('Normalize Result').first().json.category,\n    bant: $('Normalize Result').first().json.bant,\n    reasoning: $('Normalize Result').first().json.reasoning,\n    recommended_action: $('Normalize Result').first().json.recommended_action,\n    red_flags: $('Normalize Result').first().json.red_flags,\n    qualified_at: $('Normalize Result').first().json.qualified_at\n  }\n}) }}",
+        "responseBody": "={{ JSON.stringify({\n  ok: true,\n  lead: {\n    name: $('Normalize Result1').first().json.name,\n    email: $('Normalize Result1').first().json.email,\n    company: $('Normalize Result1').first().json.company,\n    budget: $('Normalize Result1').first().json.budget,\n    timeline: $('Normalize Result1').first().json.timeline\n  },\n  qualification: {\n    score: $('Normalize Result1').first().json.score,\n    category: $('Normalize Result1').first().json.category,\n    bant: $('Normalize Result1').first().json.bant,\n    reasoning: $('Normalize Result1').first().json.reasoning,\n    recommended_action: $('Normalize Result1').first().json.recommended_action,\n    red_flags: $('Normalize Result1').first().json.red_flags,\n    qualified_at: $('Normalize Result1').first().json.qualified_at\n  }\n}) }}",
         "options": {
           "responseCode": 200
         }
       },
-      "id": "088a7a35-3662-408e-afe8-b57fe5842e20",
-      "name": "Respond to Webhook",
+      "id": "0998d6e3-5eba-4ec8-b5b3-7981614c2cf0",
+      "name": "Respond to Webhook1",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        720,
+        1120,
         384
       ]
     }
   ],
   "pinData": {},
   "connections": {
-    "Webhook": {
+    "Webhook1": {
       "main": [
         [
           {
-            "node": "Prepare Lead Data",
+            "node": "Prepare Lead Data1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Prepare Lead Data": {
+    "Prepare Lead Data1": {
       "main": [
         [
           {
-            "node": "BANT Qualifier",
+            "node": "BANT Qualifier1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Google Gemini Chat Model": {
+    "BANT Qualifier1": {
+      "main": [
+        [
+          {
+            "node": "Normalize Result1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
       "ai_languageModel": [
         [
           {
-            "node": "BANT Qualifier",
+            "node": "BANT Qualifier1",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "Structured Output Parser": {
+    "Structured Output Parser1": {
       "ai_outputParser": [
         [
           {
-            "node": "BANT Qualifier",
+            "node": "BANT Qualifier1",
             "type": "ai_outputParser",
             "index": 0
           }
         ]
       ]
     },
-    "BANT Qualifier": {
-      "main": [
-        [
-          {
-            "node": "Normalize Result",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalize Result": {
+    "Normalize Result1": {
       "main": [
         [
           {
@@ -600,72 +658,72 @@
             "index": 0
           },
           {
-            "node": "Route by Category",
+            "node": "Route by Category1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Route by Category": {
+    "Route by Category1": {
       "main": [
         [
           {
-            "node": "Telegram Sales Alert",
+            "node": "Telegram Sales Alert1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Telegram Sales Alert",
+            "node": "Telegram Sales Alert1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Email Polite Rejection",
+            "node": "Email Polite Rejection1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Email Polite Rejection",
+            "node": "Email Polite Rejection1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Telegram Sales Alert": {
+    "Telegram Sales Alert1": {
       "main": [
         [
           {
-            "node": "Email Sales Team",
+            "node": "Email Sales Team1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Email Sales Team": {
+    "Email Sales Team1": {
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Respond to Webhook1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Email Polite Rejection": {
+    "Email Polite Rejection1": {
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Respond to Webhook1",
             "type": "main",
             "index": 0
           }
@@ -679,12 +737,13 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "8b758d46-a2c4-44e0-966b-f261d339bb1d",
+  "versionId": "41e6d5ab-9c4d-426f-8576-1c74ff1deb3d",
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a8f114217b89765830e339e89dbe8c6cc735f2fce18628da268c9ea07087790"
   },
   "nodeGroups": [],
-  "id": "MdkHAWYjyc4Yryfv",
+  "id": "LcsfpNa4gob82gwQ",
   "tags": [
     {
       "updatedAt": "2026-08-15T10:08:19.366Z",
